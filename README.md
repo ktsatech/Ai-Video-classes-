@@ -1,20 +1,32 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# AI Video Masterclass – Ktesatech
 
-# Run and deploy your AI Studio app
+A comprehensive management platform for the Ktesatech AI Video Masterclass. It handles applicant onboarding, lesson delivery, testimonials, and administrative workflows.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/2632e646-6369-4ea3-9642-328ed4b1dad2
+- **Applicant Management:** Track applicants through a multi‑stage workflow (registration, evaluation, training fee verification, enrollment) with receipt uploads and admin notes.
+- **Lesson Portal:** Display course modules with YouTube embeds, live/archived status, scheduled dates, duration, and downloadable resources.
+- **Testimonials:** Showcase student success stories with ratings and avatars.
+- **Admin Dashboard:** Manage applicants, update statuses, verify receipts, and send notifications. Role‑based access (Super Admin / Admin).
+- **Responsive UI:** Built with Tailwind CSS and React for a smooth experience on all devices.
 
-## Run Locally
+## Tech Stack
 
-**Prerequisites:**  Node.js
+- **Frontend:** React 19, TypeScript, Tailwind CSS
+- **State Management:** LocalStorage (simulated persistence) + React hooks
+- **Icons:** Lucide React
+- **Build Tool:** Vite
 
+## Getting Started
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/ktesatech/ai-video-masterclass.git
+   cd ai-video-masterclass
