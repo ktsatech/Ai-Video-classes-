@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   Play, Lock, Video, ShieldCheck, AlertCircle, Copy, Check, 
-  Upload, ArrowRight, Sparkles, CheckCircle2, RefreshCw, HelpCircle, Phone
+  Upload, ArrowRight, Sparkles, CheckCircle2, RefreshCw, HelpCircle, Phone,
+  Camera, Monitor
 } from 'lucide-react';
 
 export default function LiveStreamGate() {
@@ -322,13 +323,105 @@ export default function LiveStreamGate() {
               {/* Secure live stream embed wrapper */}
               <div className="bg-black rounded-3xl overflow-hidden aspect-video relative shadow-2xl border border-slate-800 group">
                 {liveStream.status !== 'offline' ? (
-                  <iframe
-                    src={liveStream.embedUrl}
-                    title={liveStream.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full"
-                  />
+                  (!liveStream.sourceType || liveStream.sourceType === 'youtube') ? (
+                    <iframe
+                      src={liveStream.embedUrl}
+                      title={liveStream.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full"
+                    />
+                  ) : liveStream.sourceType === 'camera' ? (
+                    /* WEBCAM/PHONE CAMERA DIRECT FEED SIMULATION */
+                    <div className="w-full h-full bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex flex-col items-center justify-center p-6 text-center text-slate-300 relative select-none overflow-hidden animate-fadeIn">
+                      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none" />
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1),transparent_70%)] pointer-events-none" />
+                      
+                      {/* Interactive Studio overlays */}
+                      <div className="absolute top-5 left-5 flex items-center gap-2">
+                        <span className="bg-red-600 text-white font-extrabold text-[9px] px-2 py-0.5 rounded uppercase tracking-wider flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                          LIVE FEED
+                        </span>
+                        <span className="bg-slate-900/85 border border-white/10 text-slate-300 font-bold text-[9px] px-2 py-0.5 rounded uppercase tracking-wider">
+                          STUDIO CAMERA
+                        </span>
+                      </div>
+
+                      <div className="absolute top-5 right-5 text-right font-mono text-[9px] text-slate-400">
+                        <span>FPS: 60 | UHD 1080P</span>
+                      </div>
+
+                      {/* Studio Camera Central Visualizer */}
+                      <div className="w-20 h-20 bg-indigo-600/10 border border-indigo-500/30 rounded-full flex items-center justify-center mb-4 relative">
+                        <span className="absolute inset-0 rounded-full bg-indigo-500/20 animate-ping" />
+                        <Camera className="w-8 h-8 text-indigo-400 animate-pulse" />
+                      </div>
+
+                      <h3 className="font-black text-white text-lg tracking-tight z-10">
+                        Studio Camera Broadcast Channel Active
+                      </h3>
+                      
+                      <p className="text-xs text-slate-400 max-w-sm mt-1.5 leading-relaxed font-semibold z-10">
+                        Receiving secure, direct camera feed from King Elidex's video masterclass workstation.
+                      </p>
+
+                      {/* Decorative Audio Level Spectrograph */}
+                      <div className="absolute bottom-5 left-5 right-5 flex items-end justify-center gap-1 h-8">
+                        {Array.from({ length: 18 }).map((_, i) => (
+                          <div 
+                            key={i} 
+                            style={{ 
+                              height: `${Math.floor(Math.random() * 80) + 20}%`,
+                              animationDelay: `${i * 0.05}s`
+                            }}
+                            className="w-1.5 bg-indigo-500/60 rounded-full animate-bounce"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    /* PRISM LIVE / OBS EXTERNAL ENCODER STREAM SIMULATION */
+                    <div className="w-full h-full bg-slate-950 flex flex-col items-center justify-center p-6 text-center text-slate-300 relative select-none overflow-hidden animate-fadeIn">
+                      <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900 to-slate-950" />
+                      {/* Scanning grid overlay */}
+                      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,170,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,170,255,0.03)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+                      
+                      {/* Interactive overlays */}
+                      <div className="absolute top-5 left-5 flex items-center gap-2">
+                        <span className="bg-blue-600 text-white font-extrabold text-[9px] px-2 py-0.5 rounded uppercase tracking-wider flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                          RTMP STREAM
+                        </span>
+                        <span className="bg-slate-900/85 border border-white/10 text-blue-400 font-black text-[9px] px-2 py-0.5 rounded uppercase tracking-wider font-mono">
+                          PRISM LIVE STUDIO
+                        </span>
+                      </div>
+
+                      <div className="absolute top-5 right-5 text-right font-mono text-[9px] text-slate-400">
+                        <span>BITRATE: 4500 KBPS</span>
+                      </div>
+
+                      {/* PRISM logo / stream box central indicator */}
+                      <div className="w-20 h-20 bg-blue-600/10 border border-blue-500/30 rounded-3xl flex items-center justify-center mb-4 relative rotate-3 animate-pulse">
+                        <Monitor className="w-8 h-8 text-blue-400" />
+                      </div>
+
+                      <h3 className="font-black text-white text-lg tracking-tight z-10">
+                        PRISM Live Encoder Stream Received
+                      </h3>
+                      
+                      <p className="text-xs text-slate-400 max-w-sm mt-1.5 leading-relaxed font-semibold z-10">
+                        External broadcast software input connected. Watch and interact with King Elidex live.
+                      </p>
+
+                      {/* Glowing dot in bottom-right corner */}
+                      <div className="absolute bottom-5 right-5 flex items-center gap-2 bg-slate-900/90 border border-slate-800 rounded-full px-3 py-1 font-mono text-[8px] text-blue-400 font-bold uppercase">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
+                        <span>DECODER ALIGNED</span>
+                      </div>
+                    </div>
+                  )
                 ) : (
                   /* THE NOT ONGOING SCREEN: "Video stream will appear here when ready" */
                   <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 p-6 text-center text-slate-400">

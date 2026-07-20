@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import HomeStreamPlayer from './components/HomeStreamPlayer';
 import Curriculum from './components/Curriculum';
 import RegistrationForm from './components/RegistrationForm';
 import StudentStatus from './components/StudentStatus';
@@ -53,6 +54,17 @@ function AppContent() {
                 navigate('#/'); // fallback
               }
             }} />
+            
+            {/* HOME LANDING VIDEO WATCHING AREA GATED ACCESS */}
+            <HomeStreamPlayer 
+              onNavigateToWatch={() => navigate('#/watch')}
+              onScrollToRegister={() => {
+                const element = document.getElementById('registration-portal');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            />
             
             {/* KING ELIDEX PERSONAL MISSION STATEMENT SECTION */}
             <section className="bg-slate-900 border-y border-slate-800 py-16 relative overflow-hidden">

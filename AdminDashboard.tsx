@@ -37,6 +37,7 @@ export default function AdminDashboard() {
   const [streamDesc, setStreamDesc] = useState(liveStream.description);
   const [streamEmbed, setStreamEmbed] = useState(liveStream.embedUrl);
   const [streamStatus, setStreamStatus] = useState(liveStream.status);
+  const [streamSourceType, setStreamSourceType] = useState<'camera' | 'youtube' | 'prism'>(liveStream.sourceType || 'youtube');
   const [streamSaveSuccess, setStreamSaveSuccess] = useState(false);
 
   useEffect(() => {
@@ -44,7 +45,47 @@ export default function AdminDashboard() {
     setStreamDesc(liveStream.description);
     setStreamEmbed(liveStream.embedUrl);
     setStreamStatus(liveStream.status);
+    setStreamSourceType(liveStream.sourceType || 'youtube');
   }, [liveStream]);
+
+  const formatYoutubeEmbedUrl = (url: string): string => {
+    if (!url) return '';
+    const trimmed = url.trim();
+    if (trimmed.includes('youtube.com/embed/')) return trimmed;
+    
+    // Check if they pasted an entire iframe snippet
+    const iframeMatch = trimmed.match(/src=["']([^"']+)["']/);
+    if (iframeMatch && iframeMatch[1]) {
+      return iframeMatch[1];
+    }
+
+    try {
+      if (trimmed.includes('watch?v=')) {
+        const parts = trimmed.split('watch?v=');
+        if (parts[1]) {
+          const id = parts[1].split('&')[0];
+          return `https://www.youtube.com/embed/${id}`;
+        }
+      }
+      if (trimmed.includes('youtu.be/')) {
+        const parts = trimmed.split('youtu.be/');
+        if (parts[1]) {
+          const id = parts[1].split('?')[0];
+          return `https://www.youtube.com/embed/${id}`;
+        }
+      }
+      if (trimmed.includes('youtube.com/live/')) {
+        const parts = trimmed.split('youtube.com/live/');
+        if (parts[1]) {
+          const id = parts[1].split('?')[0];
+          return `https://www.youtube.com/embed/${id}`;
+        }
+      }
+    } catch (e) {
+      console.warn('Error formatting YouTube URL:', e);
+    }
+    return trimmed;
+  };
 
   // INTERACTIVE BROADCASTER STUDIO STATES
   const [isBroadcasting, setIsBroadcasting] = useState(false);
@@ -339,13 +380,21 @@ export default function AdminDashboard() {
     e.preventDefault();
     setStreamSaveSuccess(false);
 
+    const processedUrl = streamSourceType === 'youtube' 
+      ? formatYoutubeEmbedUrl(streamEmbed) 
+      : streamEmbed.trim();
+
     updateLiveStream({
       title: streamTitle.trim(),
       description: streamDesc.trim(),
-      embedUrl: streamEmbed.trim(),
+      embedUrl: processedUrl,
       status: streamStatus as 'live' | 'replay' | 'offline',
-      ticketPrice: 1000
+      ticketPrice: 1000,
+      sourceType: streamSourceType
     });
+
+    // Make sure the local form state matches the formatted URL
+    setStreamEmbed(processedUrl);
 
     setStreamSaveSuccess(true);
     setTimeout(() => setStreamSaveSuccess(false), 3000);
@@ -1641,21 +1690,79 @@ export default function AdminDashboard() {
                       />
                     </div>
 
-                    {/* Embed URL */}
+                    {/* Stream Source Type Selection */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] uppercase font-bold text-slate-400">Streaming Video Embed Link (YouTube, Vimeo, custom)</label>
-                      <input
-                        type="url"
-                        value={streamEmbed}
-                        onChange={(e) => setStreamEmbed(e.target.value)}
-                        placeholder="e.g. https://www.youtube.com/embed/live_stream_id"
-                        className="border border-slate-200 rounded-xl p-3 font-mono text-xs text-slate-700 focus:outline-none focus:border-blue-500"
-                        required
-                      />
-                      <p className="text-[10px] text-slate-400 font-semibold leading-relaxed">
-                        💡 <strong>Android Broadcast Guide:</strong> Copy the <strong>Embed iframe src link</strong> and paste it above (e.g., <code className="bg-slate-100 px-1 py-0.5 rounded text-blue-600 font-bold font-mono">https://www.youtube.com/embed/5H-KLe5gErc</code>).
-                      </p>
+                      <label className="text-[10px] uppercase font-bold text-slate-400">Broadcasting Source Type</label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {[
+                          { id: 'youtube', name: 'YouTube URL 📺', desc: 'Paste live/replay link' },
+                          { id: 'camera', name: 'Webcam/Phone 🎥', desc: 'Use local browser camera' },
+                          { id: 'prism', name: 'PRISM / OBS 💻', desc: 'External RTMP software' }
+                        ].map((source) => (
+                          <button
+                            key={source.id}
+                            type="button"
+                            onClick={() => {
+                              setStreamSourceType(source.id as any);
+                              // Set matching default URLs to make it intuitive
+                              if (source.id === 'camera') {
+                                setStreamEmbed('local-webcam-feed');
+                              } else if (source.id === 'prism') {
+                                setStreamEmbed('prism-live-feed');
+                              } else if (streamEmbed === 'local-webcam-feed' || streamEmbed === 'prism-live-feed') {
+                                setStreamEmbed('https://www.youtube.com/embed/dQw4w9WgXcQ');
+                              }
+                            }}
+                            className={`p-3 rounded-xl border text-left transition-all flex flex-col gap-0.5 ${
+                              streamSourceType === source.id
+                                ? 'border-blue-500 bg-blue-50/50 text-blue-950 shadow-sm ring-1 ring-blue-400'
+                                : 'border-slate-200 hover:border-slate-300 text-slate-700'
+                            }`}
+                          >
+                            <span className="text-xs font-black">{source.name}</span>
+                            <span className="text-[9px] opacity-75 font-semibold">{source.desc}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
+
+                    {/* Embed URL or custom info based on streamSourceType */}
+                    {streamSourceType === 'youtube' ? (
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] uppercase font-bold text-slate-400">Pasted YouTube Video / Live Link</label>
+                        <input
+                          type="text"
+                          value={streamEmbed}
+                          onChange={(e) => setStreamEmbed(e.target.value)}
+                          placeholder="Paste watch link, youtu.be link, or live embed..."
+                          className="border border-slate-200 rounded-xl p-3 font-mono text-xs text-slate-700 focus:outline-none focus:border-blue-500"
+                          required
+                        />
+                        <p className="text-[10px] text-slate-400 font-semibold leading-relaxed">
+                          💡 Paste <strong>any YouTube URL</strong> (e.g. <code className="bg-slate-100 px-1 py-0.5 rounded text-blue-600 font-bold font-mono">https://www.youtube.com/watch?v=5H-KLe5gErc</code> or live stream channel). The portal automatically reformats it into a secure embedded stream player.
+                        </p>
+                      </div>
+                    ) : streamSourceType === 'camera' ? (
+                      <div className="p-4 bg-slate-50 border border-slate-150 rounded-2xl flex flex-col gap-1 text-slate-600 animate-fadeIn">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Webcam Active Mode</span>
+                        <p className="text-xs font-semibold leading-normal">
+                          🎥 The live stream is set to broadcast your <strong>local browser webcam or phone camera</strong>. 
+                        </p>
+                        <p className="text-[10px] text-slate-400 mt-1 font-medium">
+                          Remember to activate the <strong>Start Broadcaster</strong> switch under the Broadcaster Control Desk above to feed your live audio/video to students.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-slate-50 border border-slate-150 rounded-2xl flex flex-col gap-1 text-slate-600 animate-fadeIn">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block">PRISM Live / OBS Active Mode</span>
+                        <p className="text-xs font-semibold leading-normal">
+                          💻 The live stream is configured to receive feed from <strong>PRISM Live, OBS Studio, Streamlabs, or vMix</strong>.
+                        </p>
+                        <p className="text-[10px] text-slate-400 mt-1 font-medium leading-relaxed">
+                          Configure your broadcasting software with the <strong>Private Stream Encoder Target URL</strong> shown on the desk above. Once you start streaming, your software stream key aligns immediately.
+                        </p>
+                      </div>
+                    )}
 
                     {/* Stream Status Toggle Selector */}
                     <div className="flex flex-col gap-1.5">

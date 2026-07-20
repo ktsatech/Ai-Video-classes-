@@ -82,4 +82,5 @@ export interface LiveStreamInfo {
   embedUrl: string;                     // e.g. "https://www.youtube.com/embed/dQw4w9WgXcQ" or direct link
   status: 'live' | 'offline' | 'replay';
   ticketPrice: number;                 // 1000
+  sourceType?: 'camera' | 'youtube' | 'prism'; // live stream source: webcam/phone, YouTube url, or external software (e.g. PRISM Live)
 }

@@ -134,7 +134,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       description: 'Welcome to the active live streaming session! Learn professional AI-assisted storytelling and mobile video editing strategies in real-time directly from King Elidex.',
       embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // default demo video / stream placeholder
       status: 'offline', // default to offline
-      ticketPrice: 1000
+      ticketPrice: 1000,
+      sourceType: 'youtube'
     };
   });
 
